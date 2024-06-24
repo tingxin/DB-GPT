@@ -62,7 +62,7 @@ LLM_MODEL_CONFIG = {
     "proxyllm": "chatgpt_proxyllm",
     "chatgpt_proxyllm": "chatgpt_proxyllm",
     "bard_proxyllm": "bard_proxyllm",
-    "claude_proxyllm": "claude_proxyllm",
+    "bedrock_proxyllm": "bedrock_proxyllm",
     "wenxin_proxyllm": "wenxin_proxyllm",
     "tongyi_proxyllm": "tongyi_proxyllm",
     "zhipu_proxyllm": "zhipu_proxyllm",

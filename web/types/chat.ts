@@ -81,7 +81,7 @@ export type ModelType =
   | 'proxyllm'
   | 'chatgpt_proxyllm'
   | 'bard_proxyllm'
-  | 'claude_proxyllm'
+  | 'bedrock_proxyllm'
   | 'wenxin_proxyllm'
   | 'tongyi_proxyllm'
   | 'zhipu_proxyllm'

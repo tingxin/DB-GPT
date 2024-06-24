@@ -243,6 +243,30 @@ class BaichuanProxyLLMModelAdapter(ProxyLLMModelAdapter):
         return baichuan_generate_stream
 
 
+class BedrockProxyLLMModelAdapter(ProxyLLMModelAdapter):
+    def do_match(self, lower_model_name_or_path: Optional[str] = None):
+        return True
+
+    def get_llm_client_class(
+        self, params: ProxyModelParameters
+    ) -> Type[ProxyLLMClient]:
+        """Get llm client class"""
+        # TODO: claude proxy LLM not support ProxyLLMClient now, we just return OpenAILLMClient
+        from dbgpt.model.proxy.llms.bedrock import BedrockLLMClient
+
+        return BedrockLLMClient
+
+    def get_async_generate_stream_function(self, model, model_path: str):
+        from dbgpt.model.proxy.llms.bedrock import bedrock_generate_stream
+        return bedrock_generate_stream
+
+
+    def get_generate_stream_function(self, model, model_path: str):
+        from dbgpt.model.proxy.llms.bedrock import bedrock_generate_stream
+        return bedrock_generate_stream
+
+
+
 class YiProxyLLMModelAdapter(ProxyLLMModelAdapter):
     """Yi proxy LLM model adapter.
 
@@ -328,6 +352,7 @@ register_model_adapter(GeminiProxyLLMModelAdapter)
 register_model_adapter(SparkProxyLLMModelAdapter)
 register_model_adapter(BardProxyLLMModelAdapter)
 register_model_adapter(BaichuanProxyLLMModelAdapter)
+register_model_adapter(BedrockProxyLLMModelAdapter)
 register_model_adapter(YiProxyLLMModelAdapter)
 register_model_adapter(MoonshotProxyLLMModelAdapter)
 register_model_adapter(DeepseekProxyLLMModelAdapter)

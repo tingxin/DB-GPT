@@ -20,7 +20,7 @@ export const MODEL_ICON_MAP: Record<ModelType, { label: string; icon: string }> 
   'gptj-6b': { label: 'ggml-gpt4all-j-v1.3-groovy.bin', icon: '' },
   chatgpt_proxyllm: { label: 'chatgpt_proxyllm', icon: '/models/chatgpt.png' },
   bard_proxyllm: { label: 'bard_proxyllm', icon: '/models/bard.gif' },
-  claude_proxyllm: { label: 'claude_proxyllm', icon: '/models/claude.png' },
+  bedrock_proxyllm: { label: 'bedrock_proxyllm', icon: '/models/claude.png' },
   wenxin_proxyllm: { label: 'wenxin_proxyllm', icon: '' },
   tongyi_proxyllm: { label: 'tongyi_proxyllm', icon: '/models/qwen2.png' },
   zhipu_proxyllm: { label: 'zhipu_proxyllm', icon: '/models/zhipu.png' },
