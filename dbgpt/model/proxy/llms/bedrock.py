@@ -155,10 +155,8 @@ class BedrockLLMClient(ProxyLLMClient):
                                 region_name=region
             )
             meta_client = boto3.client("bedrock", 
-                                region_name=region, 
-                                aws_access_key_id=access_key_id,
-                                aws_secret_access_key=secret_access_key
-            )
+                                region_name=region
+                            )
 
         response = meta_client.list_foundation_models()
         self.model_info = {model['modelName']:model['modelId'] for model in response["modelSummaries"]}
