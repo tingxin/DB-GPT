@@ -73,6 +73,10 @@ class NewHFChatModelAdapter(LLMModelAdapter, ABC):
             ) from exc
         self.check_dependencies()
 
+        logger.info(
+            f"Load model from {model_path}, from_pretrained_kwargs: {from_pretrained_kwargs}"
+        )
+
         revision = from_pretrained_kwargs.get("revision", "main")
         try:
             tokenizer = AutoTokenizer.from_pretrained(
@@ -235,6 +239,43 @@ class GemmaAdapter(NewHFChatModelAdapter):
         )
 
 
+class Gemma2Adapter(NewHFChatModelAdapter):
+    """
+    https://huggingface.co/google/gemma-2-27b-it
+    https://huggingface.co/google/gemma-2-9b-it
+    """
+
+    support_4bit: bool = True
+    support_8bit: bool = True
+    support_system_message: bool = False
+
+    def use_fast_tokenizer(self) -> bool:
+        return True
+
+    def check_transformer_version(self, current_version: str) -> None:
+        if not current_version >= "4.42.1":
+            raise ValueError(
+                "Gemma2 require transformers.__version__>=4.42.1, please upgrade your transformers package."
+            )
+
+    def do_match(self, lower_model_name_or_path: Optional[str] = None):
+        return (
+            lower_model_name_or_path
+            and "gemma-2-" in lower_model_name_or_path
+            and "it" in lower_model_name_or_path
+        )
+
+    def load(self, model_path: str, from_pretrained_kwargs: dict):
+        import torch
+
+        if not from_pretrained_kwargs:
+            from_pretrained_kwargs = {}
+        from_pretrained_kwargs["torch_dtype"] = torch.bfloat16
+        # from_pretrained_kwargs["revision"] = "float16"
+        model, tokenizer = super().load(model_path, from_pretrained_kwargs)
+        return model, tokenizer
+
+
 class StarlingLMAdapter(NewHFChatModelAdapter):
     """
     https://huggingface.co/Nexusflow/Starling-LM-7B-beta
@@ -362,7 +403,12 @@ class Llama3Adapter(NewHFChatModelAdapter):
     support_8bit: bool = True
 
     def do_match(self, lower_model_name_or_path: Optional[str] = None):
-        return lower_model_name_or_path and "llama-3" in lower_model_name_or_path
+        return (
+            lower_model_name_or_path
+            and "llama-3" in lower_model_name_or_path
+            and "instruct" in lower_model_name_or_path
+            and "3.1" not in lower_model_name_or_path
+        )
 
     def get_str_prompt(
         self,
@@ -390,6 +436,22 @@ class Llama3Adapter(NewHFChatModelAdapter):
         return str_prompt
 
 
+class Llama31Adapter(Llama3Adapter):
+    def check_transformer_version(self, current_version: str) -> None:
+        logger.info(f"Checking transformers version: Current version {current_version}")
+        if not current_version >= "4.43.0":
+            raise ValueError(
+                "Llama-3.1 require transformers.__version__>=4.43.0, please upgrade your transformers package."
+            )
+
+    def do_match(self, lower_model_name_or_path: Optional[str] = None):
+        return (
+            lower_model_name_or_path
+            and "llama-3.1" in lower_model_name_or_path
+            and "instruct" in lower_model_name_or_path
+        )
+
+
 class DeepseekV2Adapter(NewHFChatModelAdapter):
     support_4bit: bool = False
     support_8bit: bool = False
@@ -414,6 +476,17 @@ class DeepseekV2Adapter(NewHFChatModelAdapter):
         model.generation_config = GenerationConfig.from_pretrained(model_path)
         model.generation_config.pad_token_id = model.generation_config.eos_token_id
         return model, tokenizer
+
+
+class DeepseekCoderV2Adapter(DeepseekV2Adapter):
+    def do_match(self, lower_model_name_or_path: Optional[str] = None):
+        return (
+            lower_model_name_or_path
+            and "deepseek" in lower_model_name_or_path
+            and "coder" in lower_model_name_or_path
+            and "v2" in lower_model_name_or_path
+            and "instruct" in lower_model_name_or_path
+        )
 
 
 class SailorAdapter(QwenAdapter):
@@ -500,9 +573,9 @@ class OpenChatAdapter(Llama3Adapter):
         )
 
 
-class GLM4Aapter(NewHFChatModelAdapter):
+class GLM4Adapter(NewHFChatModelAdapter):
     """
-    https://huggingface.co/defog/glm-4-8b
+    https://huggingface.co/THUDM/glm-4-9b-chat
     """
 
     def do_match(self, lower_model_name_or_path: Optional[str] = None):
@@ -513,6 +586,42 @@ class GLM4Aapter(NewHFChatModelAdapter):
         )
 
 
+class Codegeex4Adapter(GLM4Adapter):
+    """
+    https://huggingface.co/THUDM/codegeex4-all-9b
+    """
+
+    def do_match(self, lower_model_name_or_path: Optional[str] = None):
+        return lower_model_name_or_path and "codegeex4" in lower_model_name_or_path
+
+    def load(self, model_path: str, from_pretrained_kwargs: dict):
+        if not from_pretrained_kwargs:
+            from_pretrained_kwargs = {}
+        if "trust_remote_code" not in from_pretrained_kwargs:
+            from_pretrained_kwargs["trust_remote_code"] = True
+        return super().load(model_path, from_pretrained_kwargs)
+
+
+class Internlm2Adapter(NewHFChatModelAdapter):
+    """
+    https://huggingface.co/internlm/internlm2_5-7b-chat
+    """
+
+    def do_match(self, lower_model_name_or_path: Optional[str] = None):
+        return (
+            lower_model_name_or_path
+            and "internlm2" in lower_model_name_or_path
+            and "chat" in lower_model_name_or_path
+        )
+
+    def load(self, model_path: str, from_pretrained_kwargs: dict):
+        if not from_pretrained_kwargs:
+            from_pretrained_kwargs = {}
+        if "trust_remote_code" not in from_pretrained_kwargs:
+            from_pretrained_kwargs["trust_remote_code"] = True
+        return super().load(model_path, from_pretrained_kwargs)
+
+
 # The following code is used to register the model adapter
 # The last registered model adapter is matched first
 register_model_adapter(YiAdapter)
@@ -520,14 +629,19 @@ register_model_adapter(Yi15Adapter)
 register_model_adapter(Mixtral8x7BAdapter)
 register_model_adapter(SOLARAdapter)
 register_model_adapter(GemmaAdapter)
+register_model_adapter(Gemma2Adapter)
 register_model_adapter(StarlingLMAdapter)
 register_model_adapter(QwenAdapter)
 register_model_adapter(QwenMoeAdapter)
 register_model_adapter(Llama3Adapter)
+register_model_adapter(Llama31Adapter)
 register_model_adapter(DeepseekV2Adapter)
+register_model_adapter(DeepseekCoderV2Adapter)
 register_model_adapter(SailorAdapter)
 register_model_adapter(PhiAdapter)
 register_model_adapter(SQLCoderAdapter)
 register_model_adapter(OpenChatAdapter)
-register_model_adapter(GLM4Aapter)
+register_model_adapter(GLM4Adapter)
+register_model_adapter(Codegeex4Adapter)
 register_model_adapter(Qwen2Adapter)
+register_model_adapter(Internlm2Adapter)

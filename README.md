@@ -51,7 +51,3 @@ model_name
 </p>
 
 ### Sagemaker
-
-
-
-

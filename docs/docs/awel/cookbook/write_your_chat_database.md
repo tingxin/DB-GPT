@@ -37,7 +37,7 @@ pip install "dbgpt[rag]>=0.5.3rc0" -U
 ### Prepare Embedding Model
 
 First, you need to prepare the embedding model, you can provide an embedding model 
-according [Prepare Embedding Model](docs/latest/awel/cookbook/first_rag_with_awel#prepare-embedding-model).
+according [Prepare Embedding Model](./first_rag_with_awel.md#prepare-embedding-model).
 
 Here we use OpenAI's embedding model.
 
@@ -91,11 +91,9 @@ shutil.rmtree("/tmp/awel_with_data_vector_store", ignore_errors=True)
 
 vector_store = ChromaStore(
     ChromaVectorConfig(
+        persist_path="/tmp/tmp_ltm_vector_store",
+        name="ltm_vector_store",
         embedding_fn=embeddings,
-        vector_store_config=ChromaVectorConfig(
-            name="db_schema_vector_store",
-            persist_path="/tmp/awel_with_data_vector_store",
-        ),
     )
 )
 
@@ -137,7 +135,7 @@ print("Retrieved schema:\n", chunks)
 
 ### Prepare LLM
 We use LLM to generate SQL queries. Here we use OpenAI's LLM model, you can replace it 
-with other models according to [Prepare LLM](/docs/latest/awel/cookbook/first_rag_with_awel#prepare-llm).
+with other models according to [Prepare LLM](./first_rag_with_awel.md#prepare-llm).
 
 ```python
 from dbgpt.model.proxy import OpenAILLMClient
@@ -490,10 +488,8 @@ db_conn.create_temp_tables(
 vector_store = ChromaStore(
     ChromaVectorConfig(
         embedding_fn=embeddings,
-        vector_store_config=ChromaVectorConfig(
-            name="db_schema_vector_store",
-            persist_path="/tmp/awel_with_data_vector_store",
-        ),
+        name="db_schema_vector_store",
+        persist_path="/tmp/awel_with_data_vector_store",
     )
 )
 
